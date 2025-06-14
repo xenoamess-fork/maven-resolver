@@ -151,7 +151,7 @@ public abstract class AbstractDependencyManager implements DependencyManager {
             String version = artifact.getVersion();
             if (!version.isEmpty() && !managedVersions.containsKey(key)) {
                 if (managedVersions == this.managedVersions) {
-                    managedVersions = MMap.copy(this.managedVersions);
+                    managedVersions = MMap.append(this.managedVersions);
                 }
                 managedVersions.put(key, new Holder<>(depth, version));
             }
@@ -185,7 +185,7 @@ public abstract class AbstractDependencyManager implements DependencyManager {
             Collection<Exclusion> exclusions = managedDependency.getExclusions();
             if (!exclusions.isEmpty()) {
                 if (managedExclusions == this.managedExclusions) {
-                    managedExclusions = MMap.copy(this.managedExclusions);
+                    managedExclusions = MMap.copyWithListValue(this.managedExclusions);
                 }
                 Collection<Holder<Collection<Exclusion>>> managed = managedExclusions.get(key);
                 if (managed == null) {

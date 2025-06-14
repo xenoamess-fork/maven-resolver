@@ -18,7 +18,10 @@
  */
 package org.eclipse.aether.util.graph.manager;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -46,6 +49,14 @@ public class MMap<K, V> {
 
     public static <K, V> MMap<K, V> copy(MMap<K, V> orig) {
         return new MMap<>(new HashMap<>(orig.delegate));
+    }
+
+    public static <K, V> MMap<K, Collection<V>> copyWithListValue(MMap<K, Collection<V>> orig) {
+        HashMap<K, Collection<V>> newMap = new HashMap<>((int) Math.ceil(orig.size() / 0.75D));
+        for (Map.Entry<K, Collection<V>> entry : orig.delegate.entrySet()) {
+            newMap.put(entry.getKey(), entry.getValue() == null ? null : new ArrayList<>(entry.getValue()));
+        }
+        return new MMap<>(newMap);
     }
 
     public static <K, V> MMap<K, V> append(MMap<K, V> orig) {
