@@ -149,8 +149,11 @@ public class MMap<K, V> {
         public V put(K key, V value) {
             V originalValue = delegate.put(key, value);
             if (hashCode != Long.MAX_VALUE) {
-                hashCode -= Objects.hashCode(key) ^ Objects.hashCode(originalValue);
-                hashCode += Objects.hashCode(key) ^ Objects.hashCode(value);
+                int keyHash = Objects.hashCode(key);
+                if (originalValue != null) {
+                    hashCode -= keyHash ^ Objects.hashCode(originalValue);
+                }
+                hashCode += keyHash ^ Objects.hashCode(value);
             }
             return originalValue;
         }
@@ -159,7 +162,5 @@ public class MMap<K, V> {
         public MMap<K, V> done() {
             return new DoneMMap<>(delegate, hashCode);
         }
-
     }
-
 }
