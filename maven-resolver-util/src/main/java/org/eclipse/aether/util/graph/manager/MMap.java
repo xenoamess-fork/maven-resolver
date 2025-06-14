@@ -19,6 +19,7 @@
 package org.eclipse.aether.util.graph.manager;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * Warning: this is a special map-like construct that suits only and should be used only in this package!
@@ -47,6 +48,10 @@ public class MMap<K, V> {
         return new MMap<>(new HashMap<>(orig.delegate));
     }
 
+    public static <K, V> MMap<K, V> append(MMap<K, V> orig) {
+        return new AppendMMap<>(orig);
+    }
+
     protected final HashMap<K, V> delegate;
 
     private MMap(HashMap<K, V> delegate) {
@@ -69,6 +74,10 @@ public class MMap<K, V> {
         return new DoneMMap<>(delegate);
     }
 
+    public MMap<K, V> append() {
+        return new AppendMMap<>(this);
+    }
+
     @Override
     public int hashCode() {
         throw new IllegalStateException("MMap is not done yet");
@@ -79,11 +88,20 @@ public class MMap<K, V> {
         throw new IllegalStateException("MMap is not done yet");
     }
 
+    public int size() {
+        return delegate.size();
+    }
+
     private static class DoneMMap<K, V> extends MMap<K, V> {
-        private volatile long hashCode = Long.MAX_VALUE;
+        volatile long hashCode = Long.MAX_VALUE;
 
         private DoneMMap(HashMap<K, V> delegate) {
             super(delegate);
+        }
+
+        private DoneMMap(HashMap<K, V> delegate, long hashCode) {
+            super(delegate);
+            this.hashCode = hashCode;
         }
 
         @Override
@@ -115,4 +133,33 @@ public class MMap<K, V> {
             return delegate.equals(other.delegate);
         }
     }
+
+    private static class AppendMMap<K, V> extends DoneMMap<K, V> {
+
+        AppendMMap(MMap<K, V> orig) {
+            super(new HashMap<>(orig.delegate));
+            if (orig instanceof DoneMMap) {
+                this.hashCode = ((DoneMMap<K, V>) orig).hashCode;
+            } else {
+                this.hashCode = Long.MAX_VALUE;
+            }
+        }
+
+        @Override
+        public V put(K key, V value) {
+            V originalValue = delegate.put(key, value);
+            if (hashCode != Long.MAX_VALUE) {
+                hashCode -= Objects.hashCode(key) ^ Objects.hashCode(originalValue);
+                hashCode += Objects.hashCode(key) ^ Objects.hashCode(value);
+            }
+            return originalValue;
+        }
+
+        @Override
+        public MMap<K, V> done() {
+            return new DoneMMap<>(delegate, hashCode);
+        }
+
+    }
+
 }

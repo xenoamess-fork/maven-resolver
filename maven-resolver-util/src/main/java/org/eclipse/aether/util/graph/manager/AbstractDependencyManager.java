@@ -159,7 +159,7 @@ public abstract class AbstractDependencyManager implements DependencyManager {
             String scope = managedDependency.getScope();
             if (!scope.isEmpty() && !managedScopes.containsKey(key)) {
                 if (managedScopes == this.managedScopes) {
-                    managedScopes = MMap.copy(this.managedScopes);
+                    managedScopes = MMap.append(this.managedScopes);
                 }
                 managedScopes.put(key, new Holder<>(depth, scope));
             }
@@ -167,7 +167,7 @@ public abstract class AbstractDependencyManager implements DependencyManager {
             Boolean optional = managedDependency.getOptional();
             if (optional != null && !managedOptionals.containsKey(key)) {
                 if (managedOptionals == this.managedOptionals) {
-                    managedOptionals = MMap.copy(this.managedOptionals);
+                    managedOptionals = MMap.append(this.managedOptionals);
                 }
                 managedOptionals.put(key, new Holder<>(depth, optional));
             }
@@ -177,7 +177,7 @@ public abstract class AbstractDependencyManager implements DependencyManager {
                     : systemDependencyScope.getSystemPath(managedDependency.getArtifact());
             if (localPath != null && !managedLocalPaths.containsKey(key)) {
                 if (managedLocalPaths == this.managedLocalPaths) {
-                    managedLocalPaths = MMap.copy(this.managedLocalPaths);
+                    managedLocalPaths = MMap.append(this.managedLocalPaths);
                 }
                 managedLocalPaths.put(key, new Holder<>(depth, localPath));
             }
